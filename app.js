@@ -3,7 +3,10 @@
   const { FORMS, STATUS, renderTab, validate, printDoc, weightTotal, esc } = window.GUForms;
   const $app = document.getElementById('app');
   const $nav = document.getElementById('topnav');
-  const API = (window.GU_CONFIG || {}).API_URL;
+  const FALLBACK_API = 'https://script.google.com/macros/s/AKfycbxVqh1xY-bBL6CyNB_3J14HTTmxB9GPtvyJvDTeH2YG-LiyzhLcxbHy2_L-5-zzLwaEqA/exec';
+  const CFG = window.GU_CONFIG;
+  const CFG_URL = CFG && CFG.API_URL;
+  const API = (CFG_URL && /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(CFG_URL)) ? CFG_URL : FALLBACK_API;
 
   const store = {
     get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
@@ -22,7 +25,7 @@
   const loading = () => { $app.innerHTML = '<div class="spinner">載入中…</div>'; };
 
   async function api(action, payload) {
-    if (!API || API.indexOf('請貼上') >= 0) throw new Error('尚未設定後端網址（config.js）');
+    if (!API) throw new Error('尚未設定後端網址');
     const body = Object.assign({ action, token: S.token }, payload || {});
     let res;
     try {
